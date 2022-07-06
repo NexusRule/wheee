@@ -9,28 +9,29 @@ void temp();
 void setup();
 void loop();
 #line 1 "c:/Users/fxxsj/OneDrive/Desktop/wheee/src/wheee.ino"
-SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 #include "oled-wing-adafruit.h"
 #include "SparkFun_VCNL4040_Arduino_Library.h"
-#include <Wire.h>
+#include <blynk.h>
 VCNL4040 proximitySensor;
 OledWingAdafruit display;
 
 bool dio = 0;
 bool giorno = 0;
 bool giovana = 0;
+bool grange = 0;
 int jotaro = 0;
 int joseph = 0;
 int jonothan = 0;
 String shoyo = "A";
+String yama = "good";
 
 #define pot A0
 #define therm A1
-#define but D2
-#define hiLite D3
-#define gLite D4
-#define lowLite D5
+#define but D7
+#define hiLite A4
+#define gLite A3
+#define lowLite A2
 
 void lightPara()
 {
@@ -59,6 +60,8 @@ void lightPara()
     digitalWrite(gLite, LOW);
     digitalWrite(hiLite, LOW);
     Serial.write("low");
+    Blynk.notify("yo the lights too dim");
+    yama = "low";
     delay(200);
   }
   else if (jonothan > jotaro)
@@ -67,6 +70,8 @@ void lightPara()
     digitalWrite(gLite, LOW);
     digitalWrite(hiLite, HIGH);
     Serial.write("high");
+    Blynk.notify("yo the lights too bright");
+    yama = "high";
     delay(200);
   }
   else
@@ -151,6 +156,8 @@ void temp()
   display.print("F");
   display.display();
   shoyo = "B";
+  Blynk.virtualWrite(V1, temperature);
+  Blynk.virtualWrite(V2, f);
   delay(100);
 }
 
@@ -162,7 +169,7 @@ void setup()
   display.clearDisplay();
   display.display();
 
-  Wire.begin();
+  Blynk.begin("3ooCt2NcBosv3c9DV-MGSexZ0aBKUMTc", IPAddress(167, 172, 234, 162), 8080);
 
   proximitySensor.begin();
   proximitySensor.powerOffProximity();
@@ -186,14 +193,21 @@ void setup()
 void loop()
 {
   display.loop();
+  Blynk.run();
+
+  grange = digitalRead(V0);
 
   if (display.pressedA())
   {
-    shoyo = "A";
-  }
-  else if (display.pressedC())
-  {
-    shoyo = "B";
+    if (shoyo == "A")
+    {
+      shoyo = "B";
+    }
+    else if (shoyo == "B")
+    {
+      shoyo = "A";
+    }
+    delay(500);
   }
 
   if (shoyo == "A")
@@ -206,5 +220,8 @@ void loop()
     temp();
     Serial.print(shoyo);
   }
-  Serial.print(shoyo);
+  else if (grange == 1)
+  {
+    Series.print("tootally secret easter egg");
+  }
 }
